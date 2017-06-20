@@ -68,7 +68,7 @@ def new_user():
     if session.query(User).filter_by(username = username).first() is not None:
         print "existing user"
         user = session.query(User).filter_by(username=username).first()
-        return jsonify({'message':'user already exists'}), 200#, {'Location': url_for('get_user', id = user.id, _external = True)}
+        return jsonify({'message':'user already exists'}), 200
     email = request.json.get('email')
     firstname = request.json.get('firstname')
     lastname = request.json.get('lastname')
@@ -76,9 +76,9 @@ def new_user():
     user.hash_password(password)
     session.add(user)
     session.commit()
-    return jsonify({ 'username': user.username }), 201#, {'Location': url_for('get_user', id = user.id, _external = True)}
+    return jsonify({ 'username': user.username }), 201
 
-
+# for testing purpose
 @app.route('/api/v2/resource')
 @auth.login_required
 def get_resource():
@@ -128,6 +128,7 @@ def issue_handler(id):
     # Show a specific issue
     if request.method == 'GET':
         return jsonify(issue = issue.serialize)
+        # modify a specific issue
     elif request.method == 'PUT':
         title = request.json.get('title')
         description = request.json.get('description')
@@ -144,6 +145,7 @@ def issue_handler(id):
             issue.status = status
         session.commit()
         return jsonify(issue = issue.serialize)
+        # delete a specific issue
     elif request.method == 'DELETE':
   	session.delete(issue)
   	session.commit()

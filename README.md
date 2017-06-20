@@ -15,7 +15,7 @@ The code in this repository assumes the following python libraries are installed
 * flask-httpauth
 
 ## Design:
-System have two models called User and Issue. With following information
+System have two models called User and Issue. With following information:
 ### 1. User:
 * Email
 * Username

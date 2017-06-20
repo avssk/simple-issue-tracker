@@ -58,16 +58,59 @@ try:
 	if resp['status'] != '200':
 		raise Exception('Received an unsuccessful status code of %s' % resp['status'])
 except Exception as err:
-	print "Test 3 FAILED: Could not add new isues"
+	print "Test 3 FAILED: Could not add new issues"
 	print err.args
 	sys.exit()
 else:
-    print content
     print "Test 3 PASS: Succesfully added new issues"
 
 
 #TEST 4: TRY ACCESSING ENDPOINT WITH AN INVALID TOKEN
+try:
+	h = Http()
+	h.add_credentials("invalid-token",'blank')
+	url = address + '/api/v2/resource'
+	resp, content = h.request(url,'GET', headers = {"Content-Type" : "application/json"})
+	if resp['status'] == '200':
+		raise Exception("Security Flaw: able to log in with invalid credentials")
+except Exception as err:
+	print "Test 4 FAILED"
+	print err.args
+	sys.exit()
+else:
+    print "Test 4 PASS: App checks against invalid credentials"
 
-#TEST 5: TRY TO VIEW ALL PRODUCTS IN DATABASE
 
-#TEST 6: TRY TO VIEW A SPECIFIC API
+#TEST 5: TRY TO VIEW ALL CREATED ISSUES IN DATABASE
+try:
+	h = Http()
+	h.add_credentials(token,'blank')
+	url = address + '/api/v2/user/issues/created'
+	resp, content = h.request(url,'GET', headers = {"Content-Type" : "application/json"})
+	if resp['status'] != '200':
+		raise Exception('Received an unsuccessful status code of %s' % resp['status'])
+except Exception as err:
+	print "Test 5 FAILED: Could not get issues"
+	print err.args
+	sys.exit()
+else:
+    print "All issues created by user"
+    print content
+    print "Test 5 PASS: Succesfully"
+
+#TEST 6: TRY TO VIEW ALL ASSIGNED ISSUES IN DATABASE
+try:
+	h = Http()
+	h.add_credentials(token,'blank')
+	url = address + '/api/v2/user/issues/assigned'
+	resp, content = h.request(url,'GET', headers = {"Content-Type" : "application/json"})
+	if resp['status'] != '200':
+		raise Exception('Received an unsuccessful status code of %s' % resp['status'])
+except Exception as err:
+	print "Test 6 FAILED: Could not get issues"
+	print err.args
+	sys.exit()
+else:
+    print "All issues assigned to user:"
+    print content
+    print "Test 6 PASS: Succesfully"
