@@ -128,8 +128,11 @@ def allAssignedIssues():
 
 # show, edit or delete a specific issue
 @app.route('/api/v2/user/issues/<id>', methods = ['GET','PUT', 'DELETE'])
+@auth.login_required
 def issue_handler(id):
-    issue = session.query(Issue).filter_by(id = id).one()
+    user = g.user
+    user_id = user.id
+    issue = session.query(Issue).filter(Issue.id == id, Issue.user_assigned_by_id == user_id).one()
     # Show a specific issue
     if request.method == 'GET':
         return jsonify(issue = issue.serialize)
@@ -149,12 +152,14 @@ def issue_handler(id):
         if status:
             issue.status = status
         session.commit()
+        """
         time.sleep(12*60)
         user = session.query(User).filter_by(id = user_assigned_to_id).first()
         email = user.email
         firstname = user.firstname
         lastname = user.lastname
         send__mail(firstname, lastname, email, title, description, id)
+        """
         return jsonify(issue = issue.serialize)
         # delete a specific issue
     elif request.method == 'DELETE':
