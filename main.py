@@ -174,7 +174,7 @@ def getID(username):
 def send__mail(firstname, lastname, email, title, description, issue_id):
     return requests.post(
         "https://api.mailgun.net/v3/sandbox7247fe0615ed4ff9a3980ab9b516f864.mailgun.org/messages",
-        auth=("api", "key-1f949299d0251174477d94bba6449a7d"),
+        auth=("api", "MAILGUN-API-KEY"),
         data={"from": "Simple Issue Tracker <priyanshudeveloper@gmail.com>",
               "to": firstname+" "+lastname+" <"+email+"> ",
               "subject": "Issue: #id:" + issue_id + " :" + title,
