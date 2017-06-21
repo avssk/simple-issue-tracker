@@ -1,9 +1,14 @@
 from models import Base, User, Issue
-from flask import Flask, jsonify, request, url_for, abort, g
+from flask import Flask, jsonify, request, url_for, abort, g, render_template, request
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
+
 import random, string
+import requests, logging, os, time
+from apscheduler.schedulers.background import BackgroundScheduler
+
+
 from flask_httpauth import HTTPBasicAuth
 auth = HTTPBasicAuth()
 
@@ -144,6 +149,12 @@ def issue_handler(id):
         if status:
             issue.status = status
         session.commit()
+        time.sleep(12*60)
+        user = session.query(User).filter_by(id = user_assigned_to_id).first()
+        email = user.email
+        firstname = user.firstname
+        lastname = user.lastname
+        send__mail(firstname, lastname, email, title, description, id)
         return jsonify(issue = issue.serialize)
         # delete a specific issue
     elif request.method == 'DELETE':
@@ -159,6 +170,32 @@ def getID(username):
         abort(400)
     else:
         return user.id
+
+def send__mail(firstname, lastname, email, title, description, issue_id):
+    return requests.post(
+        "https://api.mailgun.net/v3/sandbox7247fe0615ed4ff9a3980ab9b516f864.mailgun.org/messages",
+        auth=("api", "key-1f949299d0251174477d94bba6449a7d"),
+        data={"from": "Simple Issue Tracker <priyanshudeveloper@gmail.com>",
+              "to": firstname+" "+lastname+" <"+email+"> ",
+              "subject": "Issue: #id:" + issue_id + " :" + title,
+              "text": "This isssue is assigned to you" + "\n" + "Issue Description: "+description})
+
+def send__alert():
+    issues = session.query(Issue).all()
+    issues = jsonify(issues = [issue.serialize for issue in issues])
+    for i in range(len(issues)):
+        issue_id = issues[i]['id']
+        title = issues[i]['title']
+        description = issues[i]['description']
+        user = session.query(User).filter_by(id = issues[i]['user_assigned_to_id']).first()
+        email = user.email
+        firstname = user.firstname
+        lastname = user.lastname
+        send__mail(firstname, lastname, email, title, description, issue_id)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(send__alert, 'interval', hours=24)
+scheduler.start()
 
 if __name__ == '__main__':
     app.debug = True
