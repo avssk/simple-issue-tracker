@@ -33,7 +33,6 @@ def verify_password(username_or_token, password):
     g.user = user
     return True
 
-
 @app.route("/api/v2/token")
 @auth.login_required
 def generate_auth_token():
@@ -176,6 +175,7 @@ def getID(username):
     else:
         return user.id
 
+# Function to send an email using mailgun
 def send__mail(firstname, lastname, email, title, description, issue_id):
     return requests.post(
         "https://api.mailgun.net/v3/sandbox7247fe0615ed4ff9a3980ab9b516f864.mailgun.org/messages",
@@ -185,6 +185,7 @@ def send__mail(firstname, lastname, email, title, description, issue_id):
               "subject": "Issue: #id:" + issue_id + " :" + title,
               "text": "This isssue is assigned to you" + "\n" + "Issue Description: "+description})
 
+# send alert to user for an issue
 def send__alert():
     issues = session.query(Issue).all()
     issues = jsonify(issues = [issue.serialize for issue in issues])
@@ -199,7 +200,7 @@ def send__alert():
         send__mail(firstname, lastname, email, title, description, issue_id)
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(send__alert, 'interval', hours=24)
+scheduler.add_job(send__alert, 'interval', hours=24)#send alert in every 24 hours
 scheduler.start()
 
 if __name__ == '__main__':
